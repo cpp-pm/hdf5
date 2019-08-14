@@ -477,7 +477,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             /* Check if we have VL data and string in the attribute's  datatype that must
              * be reclaimed */
             if (TRUE == h5tools_detect_vlen(wtype_id))
-                H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+                H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
             HDfree(buf);
             buf = NULL;
         } /*H5T_REFERENCE*/
@@ -509,7 +509,7 @@ done:
             /* Check if we have VL data and string in the attribute's  datatype that must
             * be reclaimed */
             if (TRUE == h5tools_detect_vlen(wtype_id))
-                H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+                H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
             /* Free buf */
             HDfree(buf);
