@@ -167,8 +167,10 @@
 ./examples/h5_select.c
 ./examples/h5_attribute.c
 ./examples/h5_mount.c
-./examples/h5_reference.c
-./examples/h5_ref2reg.c
+./examples/h5_ref_compat.c
+./examples/h5_ref_extern.c
+./examples/h5_reference_deprec.c
+./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
 ./examples/h5_vds.c
