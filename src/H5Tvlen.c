@@ -33,7 +33,6 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5VLnative_private.h" /* Native VOL connector                 */
 
 
 /****************/
@@ -815,8 +814,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_disk_getlen(H5F_t *f, const void *vl, size_t *seq_len)
+H5T__vlen_disk_getlen(H5F_t H5_ATTR_UNUSED *f, const void *_vl, size_t *seq_len)
 {
+    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -826,9 +826,8 @@ H5T__vlen_disk_getlen(H5F_t *f, const void *vl, size_t *seq_len)
     HDassert(vl);
     HDassert(seq_len);
 
-    /* Retrieve blob size */
-    if(H5VL_blob_specific(H5F_VOL_CLS(f), (void *)vl, H5VL_BLOB_GETSIZE, seq_len) < 0) /* Casting away 'const' OK -QAK */
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob size")
+    /* Get length of sequence (different from blob size) */
+    UINT32DECODE(vl, *seq_len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -848,9 +847,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_disk_isnull(const H5F_t *f, void *vl, hbool_t *isnull)
+H5T__vlen_disk_isnull(const H5F_t *f, void *_vl, hbool_t *isnull)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -858,6 +858,9 @@ H5T__vlen_disk_isnull(const H5F_t *f, void *vl, hbool_t *isnull)
     HDassert(f);
     HDassert(vl);
     HDassert(isnull);
+
+    /* Skip the sequence's length */
+    vl += 4;
 
     /* Check if blob ID is "nil" */
     if(H5VL_blob_specific(H5F_VOL_CLS(f), vl, H5VL_BLOB_ISNULL, f, isnull) < 0)
@@ -881,8 +884,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_disk_setnull(H5F_t *f, void *vl, void *bg)
+H5T__vlen_disk_setnull(H5F_t *f, void *_vl, void *bg)
 {
+    uint8_t *vl = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -896,6 +900,9 @@ H5T__vlen_disk_setnull(H5F_t *f, void *vl, void *bg)
         /* Delete sequence in destination location */
         if(H5T__vlen_disk_delete(f, bg) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object")
+
+    /* Set the length of the sequence */
+    UINT32ENCODE(vl, 0);
 
     /* Set blob ID to "nil" */
     if(H5VL_blob_specific(H5F_VOL_CLS(f), vl, H5VL_BLOB_SETNULL, f) < 0)
@@ -921,17 +928,21 @@ done:
 static herr_t
 H5T__vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
 {
+    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check parameters */
     HDassert(f);
-    HDassert(_vl);
+    HDassert(vl);
     HDassert(buf);
 
+    /* Skip the length of the sequence */
+    vl += 4;
+
     /* Retrieve blob */
-    if(H5VL_blob_get(H5F_VOL_CLS(f), _vl, f, buf) < 0)
+    if(H5VL_blob_get(H5F_VOL_CLS(f), vl, f, buf) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob")
 
 done:
@@ -955,14 +966,14 @@ static herr_t
 H5T__vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_alloc_info,
     void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size)
 {
-    H5VL_blob_put_ctx_t ctx;            /* Blob 'put' context info */
+    uint8_t *vl = (uint8_t *)_vl;       /* Pointer to the user's hvl_t information */
     const uint8_t *bg = (const uint8_t *)_bg; /* Pointer to the old data hvl_t */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* check parameters */
-    HDassert(_vl);
+    HDassert(vl);
     HDassert(seq_len == 0 || buf);
     HDassert(f);
 
@@ -971,12 +982,11 @@ H5T__vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_al
         if(H5T__vlen_disk_delete(f, bg) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object")
 
-    /* 'Context' info for put operation */
-    ctx.f = f;
-    ctx.seq_len = seq_len;
+    /* Set the length of the sequence */
+    UINT32ENCODE(vl, seq_len);
 
     /* Store blob */
-    if(H5VL_blob_put(H5F_VOL_CLS(f), buf, (seq_len * base_size), &ctx, _vl) < 0)
+    if(H5VL_blob_put(H5F_VOL_CLS(f), buf, (seq_len * base_size), f, vl) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob")
 
 done:
@@ -997,8 +1007,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_disk_delete(H5F_t *f, const void *vl)
+H5T__vlen_disk_delete(H5F_t *f, const void *_vl)
 {
+    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1007,9 +1018,17 @@ H5T__vlen_disk_delete(H5F_t *f, const void *vl)
     HDassert(f);
 
     /* Free heap object for old data */
-    if(vl != NULL)
-        if(H5VL_blob_specific(H5F_VOL_CLS(f), (void *)vl, H5VL_BLOB_SETNULL, f) < 0)   /* Casting away 'const' OK -QAK */
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
+    if(vl != NULL) {
+        size_t seq_len;             /* VL sequence's length */
+
+        /* Get length of sequence */
+        UINT32DECODE(vl, seq_len);
+
+        /* Delete object, if length > 0 */
+        if(seq_len > 0)
+            if(H5VL_blob_specific(H5F_VOL_CLS(f), (void *)vl, H5VL_BLOB_DELETE, f) < 0)   /* Casting away 'const' OK -QAK */
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

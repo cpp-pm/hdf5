@@ -30,13 +30,6 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* 'Context' info for put operation */
-struct H5F_t;
-typedef struct H5VL_blob_put_ctx_t {
-    struct H5F_t *f;            /* File pointer for global heap */
-    size_t seq_len;             /* Sequence length (i.e. # of base elements) */
-} H5VL_blob_put_ctx_t;
-
 
 /*****************************/
 /* Library Private Variables */
