@@ -100,6 +100,7 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
             }
 
         case H5VL_OBJECT_BY_SELF:
+        case H5VL_OBJECT_BY_TOKEN:
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "unknown open parameters")
     } /* end switch */
