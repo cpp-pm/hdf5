@@ -188,7 +188,6 @@ typedef enum H5VL_loc_type_t {
     H5VL_OBJECT_BY_SELF,
     H5VL_OBJECT_BY_NAME,
     H5VL_OBJECT_BY_IDX,
-    H5VL_OBJECT_BY_ADDR,
     H5VL_OBJECT_BY_REF,
     H5VL_OBJECT_BY_TOKEN
 } H5VL_loc_type_t;
@@ -206,10 +205,6 @@ typedef struct H5VL_loc_by_idx {
     hid_t lapl_id;
 } H5VL_loc_by_idx_t;
 
-typedef struct H5VL_loc_by_addr {
-    haddr_t addr;
-} H5VL_loc_by_addr_t;
-
 typedef struct H5VL_loc_by_ref {
     H5R_type_t ref_type;
     const void *_ref;
@@ -221,9 +216,9 @@ typedef struct H5VL_loc_by_token {
 } H5VL_loc_by_token_t;
 
 /* Structure to hold parameters for object locations.
- * Either: BY_SELF, BY_ADDR, BY_NAME, BY_IDX, BY_REF, BY_TOKEN
+ * Either: BY_SELF, BY_NAME, BY_IDX, BY_REF, BY_TOKEN
  *
- * Note: Leave loc_by_addr as the first union member so we
+ * Note: Leave loc_by_token as the first union member so we
  *       can perform the simplest initialization of the struct
  *       without raising warnings.
  *
@@ -233,11 +228,10 @@ typedef struct H5VL_loc_params_t {
     H5I_type_t      obj_type;
     H5VL_loc_type_t type;
     union{
-        H5VL_loc_by_addr_t      loc_by_addr;
+        H5VL_loc_by_token_t     loc_by_token;
         H5VL_loc_by_name_t      loc_by_name;
         H5VL_loc_by_idx_t       loc_by_idx;
         H5VL_loc_by_ref_t       loc_by_ref;
-        H5VL_loc_by_token_t     loc_by_token;
     } loc_data;
 } H5VL_loc_params_t;
 
