@@ -942,7 +942,7 @@ H5T__vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
     vl += 4;
 
     /* Retrieve blob */
-    if(H5VL_blob_get(H5F_VOL_CLS(f), vl, f, buf) < 0)
+    if(H5VL_blob_get(H5F_VOL_CLS(f), vl, f, buf, NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob")
 
 done:

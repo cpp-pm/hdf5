@@ -6576,7 +6576,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_blob_put(const H5VL_class_t *cls, void *blob, size_t size, void *ctx, void *id)
+H5VL_blob_put(const H5VL_class_t *cls, const void *blob, size_t size, void *ctx,
+    void *id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -6613,7 +6614,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_blob_get(const H5VL_class_t *cls, const void *id, void *ctx, void *buf)
+H5VL_blob_get(const H5VL_class_t *cls, const void *id, void *ctx, void *buf,
+    size_t *size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -6629,7 +6631,7 @@ H5VL_blob_get(const H5VL_class_t *cls, const void *id, void *ctx, void *buf)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob get' method")
 
     /* Call the corresponding VOL callback */
-    if((cls->blob_cls.get)(id, ctx, buf) < 0)
+    if((cls->blob_cls.get)(id, ctx, buf, size) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get callback failed")
 
 done:
@@ -6650,7 +6652,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_blob_specific(const H5VL_class_t *cls, void *id,
+H5VL_blob_specific(const H5VL_class_t *cls, const void *id,
     H5VL_blob_specific_t specific_type, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */

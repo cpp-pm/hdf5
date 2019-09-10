@@ -102,10 +102,10 @@ H5_DLL herr_t H5VL__native_datatype_specific(void *dt, H5VL_datatype_specific_t 
 H5_DLL herr_t H5VL__native_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Blob callbacks */
-H5_DLL herr_t H5VL__native_blob_put(void *blob, size_t size, void *ctx, void *id);
-H5_DLL herr_t H5VL__native_blob_get(const void *id, void *ctx, void *buf);
-H5_DLL herr_t H5VL__native_blob_specific(void *id, H5VL_blob_specific_t specific_type, va_list arguments);
-H5_DLL herr_t H5VL__native_blob_optional(void *id, va_list arguments);
+H5_DLL herr_t H5VL__native_blob_put(const void *blob, size_t size, void *ctx, void *id);
+H5_DLL herr_t H5VL__native_blob_get(const void *id, void *ctx, void *buf, size_t *size);
+H5_DLL herr_t H5VL__native_blob_specific(const void *id, H5VL_blob_specific_t specific_type, va_list arguments);
+H5_DLL herr_t H5VL__native_blob_optional(const void *id, va_list arguments);
 
 #ifdef __cplusplus
 }

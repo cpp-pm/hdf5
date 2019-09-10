@@ -68,7 +68,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_put(void *blob, size_t size, void *_ctx, void *_id)
+H5VL__native_blob_put(const void *blob, size_t size, void *_ctx, void *_id)
 {
     uint8_t *id = (uint8_t *)_id;       /* Pointer to blob ID */
     H5F_t *f = (H5F_t *)_ctx;           /* Retrieve file pointer from context */
@@ -83,7 +83,7 @@ H5VL__native_blob_put(void *blob, size_t size, void *_ctx, void *_id)
     HDassert(f);
 
     /* Write the VL information to disk (allocates space also) */
-    if(H5HG_insert(f, size, blob, &hobjid) < 0)
+    if(H5HG_insert(f, size, (void *)blob, &hobjid) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write blob information")
 
     /* Encode the heap information */
@@ -108,7 +108,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_get(const void *_id, void *_ctx, void *buf)
+H5VL__native_blob_get(const void *_id, void *_ctx, void *buf, size_t *size)
 {
     const uint8_t *id = (const uint8_t *)_id; /* Pointer to the disk blob ID */
     H5F_t *f = (H5F_t *)_ctx;           /* Retrieve file pointer from context */
@@ -129,7 +129,7 @@ H5VL__native_blob_get(const void *_id, void *_ctx, void *buf)
     /* Check if this sequence actually has any data */
     if(hobjid.addr > 0)
         /* Read the VL information from disk */
-        if(NULL == H5HG_read(f, &hobjid, buf, NULL))
+        if(NULL == H5HG_read(f, &hobjid, buf, size))
             HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "unable to read VL information")
 
 done:
@@ -150,7 +150,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_specific(void *_id, H5VL_blob_specific_t specific_type,
+H5VL__native_blob_specific(const void *_id, H5VL_blob_specific_t specific_type,
     va_list arguments)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
@@ -248,13 +248,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_optional(void *id, va_list arguments)
+H5VL__native_blob_optional(const void H5_ATTR_UNUSED *id, va_list H5_ATTR_UNUSED arguments)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_blob_optional() */
 

@@ -365,10 +365,10 @@ typedef struct H5VL_request_class_t {
 
 /* 'blob' routines */
 typedef struct H5VL_blob_class_t {
-    herr_t (*put)(void *blob, size_t size, void *ctx, void *id);
-    herr_t (*get)(const void *id, void *ctx, void *blob);
-    herr_t (*specific)(void *id, H5VL_blob_specific_t specific_type, va_list arguments);
-    herr_t (*optional)(void *id, va_list arguments);
+    herr_t (*put)(const void *blob, size_t size, void *ctx, void *id);
+    herr_t (*get)(const void *id, void *ctx, void *blob, size_t *size);
+    herr_t (*specific)(const void *id, H5VL_blob_specific_t specific_type, va_list arguments);
+    herr_t (*optional)(const void *id, va_list arguments);
 } H5VL_blob_class_t;
 
 /*
