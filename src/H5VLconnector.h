@@ -37,6 +37,8 @@
 #define H5VL_CAP_FLAG_NONE              0       /* No special connector capabilities */
 #define H5VL_CAP_FLAG_THREADSAFE        0x01    /* Connector is threadsafe */
 
+/* The maximum size allowed for blobs */
+#define H5VL_MAX_BLOB_SIZE              (16)    /* Allow for 128-bits blobs */
 
 /*******************/
 /* Public Typedefs */
