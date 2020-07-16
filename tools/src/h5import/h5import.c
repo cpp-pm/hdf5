@@ -1086,12 +1086,12 @@ out:
  */
 static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 {
-    hid_t   group_id    = -1;
-    hid_t   dset_id     = -1;
-    hid_t   space_id    = -1;
-    hid_t   mspace_id   = -1;
-    hid_t   type_id     = -1;
-    hid_t   handle      = -1;
+    hid_t   group_id    = H5I_INVALID_HID;
+    hid_t   dset_id     = H5I_INVALID_HID;
+    hid_t   space_id    = H5I_INVALID_HID;
+    hid_t   mspace_id   = H5I_INVALID_HID;
+    hid_t   type_id     = H5I_INVALID_HID;
+    hid_t   handle      = H5I_INVALID_HID;
     char   *str1        = NULL;
     char   *str2        = NULL;
     char   *str3        = NULL;
@@ -1428,7 +1428,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
     /* Initialize machine endian */
     volatile uint32_t ibyte=0x01234567;
     /* 0 for big endian, 1 for little endian. */
-    if ((*((uint8_t*)(&ibyte))) == 0x67) {
+    if ((*((volatile uint8_t*)(&ibyte))) == 0x67) {
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
             (void) HDfprintf(stderr, "%s", err11e);
             return (-1);
@@ -4707,14 +4707,14 @@ static int process(struct Options *opt)
     return (0);
 }
 
-uint16_t swap_uint16( uint16_t val)
+uint16_t swap_uint16(uint16_t val)
 {
-    return (val << 8) | (val >> 8);
+    return (uint16_t)((val << 8) | (val >> 8));
 }
 
 int16_t swap_int16(int16_t val)
 {
-    return (val << 8) | ((val >> 8) & 0xFF);
+    return (int16_t)((val << 8) | ((val >> 8) & 0xFF));
 }
 
 uint32_t swap_uint32(uint32_t val)
@@ -4725,15 +4725,15 @@ uint32_t swap_uint32(uint32_t val)
 
 int32_t swap_int32(int32_t val)
 {
-    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+    val = (int32_t)(((uint32_t)(val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF));
     return (val << 16) | ((val >> 16) & 0xFFFF);
 }
 
 int64_t swap_int64(int64_t val)
 {
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL) | ((val >> 16) & 0x0000FFFF0000FFFFULL);
-    return (val << 32) | ((val >> 32) & 0xFFFFFFFFULL);
+    val = (int64_t)(((uint64_t)(val << 8) & 0xFF00FF00FF00FF00ULL) | ((uint64_t)(val >> 8) & 0x00FF00FF00FF00FFULL));
+    val = (int64_t)(((uint64_t)(val << 16) & 0xFFFF0000FFFF0000ULL) | ((uint64_t)(val >> 16) & 0x0000FFFF0000FFFFULL));
+    return (int64_t)((uint64_t)(val << 32) | ((uint64_t)(val >> 32) & 0xFFFFFFFFULL));
 }
 
 uint64_t swap_uint64(uint64_t val)

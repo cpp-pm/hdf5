@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TEST_PAR C)
 
 #-----------------------------------------------------------------------------
@@ -72,10 +72,13 @@ set (H5P_TESTS
     t_init_term
     t_shapesame
     t_filters_parallel
+    t_2Gio
 )
 
 foreach (h5_testp ${H5P_TESTS})
   ADD_H5P_EXE(${h5_testp})
 endforeach ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_PARALLEL)
+  include (CMakeTests.cmake)
+endif ()

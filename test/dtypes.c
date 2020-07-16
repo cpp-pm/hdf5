@@ -1216,8 +1216,8 @@ test_compound_6(void)
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)((void *)orig)) + i;
-        s_ptr->b    = (i*8+1) & 0x7fff;
-        s_ptr->d    = (i*8+6) & 0x7fff;
+        s_ptr->b    = (int16_t)((i*8+1) & 0x7fff);
+        s_ptr->d    = (int16_t)((i*8+6) & 0x7fff);
     }
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
@@ -1809,7 +1809,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+    if(H5Treclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -1875,7 +1875,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+    if(H5Treclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't read data\n");
         goto error;
@@ -2063,12 +2063,12 @@ test_compound_10(void)
             goto error;
         }
     } /* end for */
-    if(H5Dvlen_reclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+    if(H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
     } /* end if */
-    if(H5Dvlen_reclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0) {
+    if(H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -2226,7 +2226,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
     } /* end for */
-    if(H5Dvlen_reclaim(little_tid2, space_id, H5P_DEFAULT, buf) < 0) {
+    if(H5Treclaim(little_tid2, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim data\n");
         goto error;
@@ -2270,7 +2270,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
     } /* end for */
-    if(H5Dvlen_reclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
+    if(H5Treclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim data\n");
         goto error;
@@ -2308,7 +2308,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
     } /* end for */
-    if(H5Dvlen_reclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
+    if(H5Treclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim data\n");
         goto error;
@@ -2811,13 +2811,13 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
+    if(H5Treclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
     } /* end if */
     rdata1.str = NULL;
-    if(H5Dvlen_reclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
+    if(H5Treclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -2898,13 +2898,13 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
+    if(H5Treclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
     } /* end if */
     rdata1.str = NULL;
-    if(H5Dvlen_reclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
+    if(H5Treclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -5884,7 +5884,7 @@ test_latest(void)
     hid_t       file = (-1);            /* File ID */
     hid_t       tid1 = (-1), tid2 = (-1); /* Datatype ID */
     hid_t       fapl = (-1);            /* File access property list */
-    H5O_info_t    oi;                     /* Stat buffer for committed datatype */
+    H5O_native_info_t    oi;            /* Stat buffer for committed datatype */
     hsize_t     old_dtype_oh_size;      /* Size of object header with "old" format */
     hsize_t     new_dtype_oh_size;      /* Size of object header with "new" format */
     char        filename[1024];         /* Buffer for filename */
@@ -5918,7 +5918,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     old_dtype_oh_size = oi.hdr.space.total;
 
@@ -5943,7 +5943,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check that the object header info is still the same */
@@ -5979,7 +5979,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     new_dtype_oh_size = oi.hdr.space.total;
 
@@ -6008,7 +6008,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check that the object header info is still the same */
@@ -6732,7 +6732,7 @@ static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
     hid_t my_fapl;      /* Copy of file access property list ID */
     hid_t dcpl;         /* Dataset creation property list ID */
     unsigned use_at_least_v18;/* Whether to use old or new format */
-    herr_t status;      /* Generic return value */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Generic return value */
 
     /* Make copy of FAPL */
     my_fapl = H5Pcopy(fapl);
@@ -6858,8 +6858,8 @@ test_delete_obj_named(hid_t fapl)
 
     /* Loop through all valid the combinations of low/high library format bounds,
        to test delete objects that use named datatypes through different file IDs */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -6959,8 +6959,8 @@ test_delete_obj_named_fileid(hid_t fapl)
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -7292,7 +7292,7 @@ test_utf_ascii_conv(void)
 
     /* Test conversion in memory */
     H5E_BEGIN_TRY {
-        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, (void *)utf8_w, NULL, H5P_DEFAULT);
+        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, &utf8_w, NULL, H5P_DEFAULT);
     } H5E_END_TRY
     if(status >= 0)
         FAIL_STACK_ERROR
@@ -7325,7 +7325,7 @@ test_utf_ascii_conv(void)
      ************************************************/
     /* Test conversion in memory */
     H5E_BEGIN_TRY {
-        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, (void *)ascii_w, NULL, H5P_DEFAULT);
+        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, &ascii_w, NULL, H5P_DEFAULT);
     } H5E_END_TRY
     if(status >= 0)
         FAIL_STACK_ERROR
@@ -7648,10 +7648,9 @@ test_versionbounds(void)
     H5F_t *filep = NULL;       /* Pointer to internal structure of a file */
     H5T_t *dtypep = NULL;      /* Pointer to internal structure of a datatype */
     hsize_t arr_dim[] = {ARRAY_LEN}; /* Length of the array */
-    int i, j;                   /* Indices for iterating over versions */
-    H5F_libver_t low, high;    /* File format bounds */
-    H5F_libver_t versions[] = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110};
-    int versions_count = 3;     /* Number of version bounds in the array */
+    int low, high;             /* Indices for iterating over versions */
+    H5F_libver_t versions[] = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110, H5F_LIBVER_V112};
+    int versions_count = 4;     /* Number of version bounds in the array */
     unsigned highest_version;  /* Highest version in nested datatypes */
     color_t enum_val;          /* Enum type index */
     herr_t ret = 0;            /* Generic return value */
@@ -7751,13 +7750,13 @@ test_versionbounds(void)
        skipping invalid combinations */
     /* Create the file, create and write to a dataset with compound datatype */
     /* Verify the dataset's datatype and its members */
-    for(i = 0, low = versions[i]; i < versions_count; i++) {
+    for(low = 0; low < versions_count; low++) {
 
-        for(j = 0, high = versions[j]; j < versions_count; j++) {
+        for(high = 0; high < versions_count; high++) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
-                ret = H5Pset_libver_bounds(fapl, low, high);
+                ret = H5Pset_libver_bounds(fapl, versions[low], versions[high]);
             } H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -7783,7 +7782,7 @@ test_versionbounds(void)
             highest_version = dtypep->shared->version;
 
             /* Verify version of the datatype recursevily */
-            ret = verify_version(dset_dtype, low, &highest_version);
+            ret = verify_version(dset_dtype, versions[low], &highest_version);
 
             /* Close the dataset's datatype */
             if (H5Tclose(dset_dtype) < 0) TEST_ERROR

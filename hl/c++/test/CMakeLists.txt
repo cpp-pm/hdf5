@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_HL_CPP_TEST CXX)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
@@ -24,4 +24,6 @@ else ()
 endif ()
 set_target_properties (hl_ptableTest PROPERTIES FOLDER test/hl/cpp)
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_CPP AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

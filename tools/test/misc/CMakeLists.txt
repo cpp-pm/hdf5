@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_MISC C)
 
 # --------------------------------------------------------------------
@@ -55,6 +55,8 @@ else ()
 endif ()
 set_target_properties (clear_open_chk PROPERTIES FOLDER tools)
 
-include (CMakeTestsRepart.cmake)
-include (CMakeTestsClear.cmake)
-include (CMakeTestsMkgrp.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTestsRepart.cmake)
+  include (CMakeTestsClear.cmake)
+  include (CMakeTestsMkgrp.cmake)
+endif ()

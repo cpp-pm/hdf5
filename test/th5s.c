@@ -591,7 +591,7 @@ test_h5s_zero_dim(void)
                 wdata_real[i][j][k] = (int)(i + j + k);
 
     /* Test with different space allocation times */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
 
         /* Make sure we can create the space with the dimension size 0 (starting from v1.8.7).
          * The dimension doesn't need to be unlimited. */
@@ -1739,12 +1739,12 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                 case CONFIG_16:
                     stride = POWER16 - 1;
                     block = 4;
-                    expected_enc_size = expected_version == 3 ? 2 : 4;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 2 : 4);
                     break;
                 case CONFIG_32:
                     stride = POWER32 - 1;
                     block = 4;
-                    expected_enc_size = expected_version == 3 ? 4 : 8;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
                     
                     break;
                 default:
@@ -1765,12 +1765,12 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                 case CONFIG_16:
                     stride = POWER16 - 1;
                     block = POWER16 - 2;
-                    expected_enc_size = expected_version == 3 ? 2 : 4;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 2 : 4);
                     break;
                 case CONFIG_32:
                     stride = POWER32 - 1;
                     block = POWER32 - 2;
-                    expected_enc_size = expected_version == 3 ? 4 : 8;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
                     break;
                 default:
                     HDassert(0);
@@ -1912,7 +1912,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
     for(config = CONFIG_8; config <= CONFIG_32; config++) {
         hbool_t expected_to_fail = FALSE;   /* Whether H5Sencode2 is expected to fail */
         uint32_t expected_version = 0;      /* Expected version for selection info */
-        uint8_t expected_enc_size = 0;      /* Expected encoded size for selection info */
+        uint32_t expected_enc_size = 0;     /* Expected encoded size for selection info */
 
         start = 0;
         count = 2;
@@ -1984,7 +1984,8 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
         VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
 
         /* Verify the version and encoded size expected for the configuration */
-        ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+        HDassert(expected_enc_size <= 255);
+        ret = test_h5s_check_encoding(fapl, sid, expected_version, (uint8_t)expected_enc_size, expected_to_fail);
         CHECK(ret, FAIL, "test_h5s_check_encoding");
 
     } /* for config */
@@ -3366,8 +3367,8 @@ test_h5s(void)
     test_h5s_zero_dim();        /* Test dataspace with zero dimension size */
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Invalid combinations, just continue */
             if(high == H5F_LIBVER_EARLIEST || high < low)

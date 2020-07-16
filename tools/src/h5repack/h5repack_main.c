@@ -236,11 +236,6 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
     PRINTVALSTREAM(rawoutstream, "   minimum shared datatype size of 20\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "5) h5repack --low=0 --high=1 file1 file2\n");
-    PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via\n");
-    PRINTVALSTREAM(rawoutstream, "   H5Pset_libver_bounds() when creating the repacked file, file2\n");
-    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
@@ -248,6 +243,11 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,0,1,9 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "7) h5repack --low=0 --high=1 file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via\n");
+    PRINTVALSTREAM(rawoutstream, "   H5Pset_libver_bounds() when creating the repacked file, file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 
@@ -280,7 +280,7 @@ int read_info(const char *filename, pack_opt_t *options)
     char comp_info[1024];
     FILE *fp = NULL;
     char c;
-    int i, rc = 1;
+    int i;
     int ret_value = EXIT_SUCCESS;
 
     if (NULL == (fp = HDfopen(filename, "r"))) {
@@ -411,7 +411,7 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
-    int opt;
+    int bound, opt;
     int ret_value = 0;
 
     /* parse command line options */
@@ -491,19 +491,21 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'j':
-                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if (options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
+                bound = HDatoi(opt_arg);
+                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
                     goto done;
                 }
+                options->low_bound = bound;
                 break;
 
             case 'k':
-                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if (options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
+                bound = HDatoi(opt_arg);
+                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
                     goto done;
                 }
+                options->high_bound = bound;
                 break;
 
             case 'c':

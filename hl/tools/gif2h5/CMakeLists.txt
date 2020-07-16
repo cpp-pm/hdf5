@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_HL_TOOLS_GIF2H5 C)
 
 #-----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_SERIAL)
   # --------------------------------------------------------------------
   # This executable can generate the actual test files - Currently not
   #  used in the CMake Build system as we rely on the test files that are
@@ -83,7 +83,9 @@ if (BUILD_TESTING)
 #      add_test (NAME hl_h52gifgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_h52gifgentest>)
   endif ()
 
-  include (CMakeTests.cmake)
+  if (HDF5_TEST_TOOLS)
+    include (CMakeTests.cmake)
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

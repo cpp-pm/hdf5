@@ -1,8 +1,8 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_H5REPACK C)
 
 # --------------------------------------------------------------------
-# Add h5Repack test executables
+# Add h5repack test executables
 # --------------------------------------------------------------------
 add_executable (testh5repack_detect_szip ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
 target_include_directories (testh5repack_detect_szip
@@ -85,4 +85,19 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-include (CMakeTests.cmake)
+# --------------------------------------------------------------------
+# Add the h5repack test executable
+# --------------------------------------------------------------------
+if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+  add_executable (h5repackgentest ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/h5repackgentest.c)
+  target_include_directories (h5repackgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (h5repackgentest STATIC)
+  target_link_libraries (h5repackgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (h5repackgentest PROPERTIES FOLDER generator/tools)
+
+  #add_test (NAME h5repackgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repackgentest>)
+endif ()
+
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

@@ -147,10 +147,12 @@ const char *FILENAME[] = {
 #define DSET_COPY_DCPL_NAME_1          "copy_dcpl_1"
 #define DSET_COPY_DCPL_NAME_2          "copy_dcpl_2"
 #define COPY_DCPL_EXTFILE_NAME         "ext_file"
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #define DSET_DEPREC_NAME               "deprecated"
 #define DSET_DEPREC_NAME_CHUNKED       "deprecated_chunked"
 #define DSET_DEPREC_NAME_COMPACT       "deprecated_compact"
 #define DSET_DEPREC_NAME_FILTER        "deprecated_filter"
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Dataset names for testing Fixed Array Indexing */
 #define DSET_FIXED_MAX     "DSET_FIXED_MAX"
@@ -176,7 +178,9 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_CORRUPT           306
 #define H5Z_FILTER_CAN_APPLY_TEST    307
 #define H5Z_FILTER_SET_LOCAL_TEST    308
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5Z_FILTER_DEPREC            309
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 #define H5Z_FILTER_EXPAND            310
 #define H5Z_FILTER_CAN_APPLY_TEST2   311
 #define H5Z_FILTER_COUNT             312
@@ -834,8 +838,8 @@ test_compact_io(hid_t fapl)
        skipping invalid combinations.
        - Create a file, create and write a compact dataset, and verify its data
        - Verify the dataset's layout and fill message versions */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
@@ -2290,9 +2294,9 @@ H5_ATTR_UNUSED
 
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP)
+#if defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP)
     hsize_t     combo_size;         /* Size of dataset with multiple filters */
-#endif /* defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP */
+#endif /* defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP) */
 
     /* test the H5Zget_filter_info function */
     if(test_get_filter_info() < 0) goto error;
@@ -4085,8 +4089,8 @@ test_nbit_compound_3(hid_t file)
      * Cleanup
      *----------------------------------------------------------------------
      */
-    if(H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, new_data) < 0) goto error;
-    if(H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, orig_data) < 0) goto error;
+    if(H5Treclaim(cmpd_tid, space, H5P_DEFAULT, new_data) < 0) goto error;
+    if(H5Treclaim(cmpd_tid, space, H5P_DEFAULT, orig_data) < 0) goto error;
     if(H5Tclose(i_tid) < 0) goto error;
     if(H5Tclose(str_tid) < 0) goto error;
     if(H5Tclose(vl_str_tid) < 0) goto error;
@@ -5293,7 +5297,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i); 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
 
@@ -5307,7 +5311,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i); 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -5322,7 +5326,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -5336,7 +5340,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -7022,6 +7026,71 @@ error:
     return FAIL;
 } /* end test_missing_chunk() */
 
+/* Using Euclid's algorithm, find the greatest common divisor (GCD) of
+ * the two arguments and return it.
+ *
+ * The GCD is negative if the arguments have opposite sign.  Otherwise,
+ * it is positive.
+ *
+ * If either argument is zero, then the result is undefined.
+ */
+static long
+gcd(const long l0, const long r0)
+{
+    long magnitude, remainder;
+    bool negative = ((l0 < 0) != (r0 < 0));
+    long l = labs(l0), r = labs(r0);
+
+    do {
+        if (l < r) {
+            r = r % l;
+            remainder = r;
+        } else /* r <= l */ {
+            l = l % r;
+            remainder = l;
+        }
+    } while (remainder != 0);
+
+    magnitude = (l == 0) ? r : l;
+    return negative ? -magnitude : magnitude;
+}
+
+/* Choose a random offset into an array `nelts` elements long, and store
+ * it at `offsetp`.  The offset will be in the range [0, nelts - 1].
+ * Also choose a random increment, `inc`, that "generates" all
+ * indices in [0, nelts - 1] when it is added to itself repeatedly.
+ * That is, the range of the discrete function `f(i) = (i * inc)
+ * mod nelts` on the domain [0, nelts - 1] is [0, nelts - 1].  Store
+ * `inc` at `incp`.
+ *
+ * If `nelts <= 0`, results are undefined.
+ */
+static void
+make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
+{
+    long inc;
+    long maxinc;
+
+    HDassert(0 < nelts);
+
+    *offsetp = HDrandom() % nelts;
+
+    /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
+     * `x + maxinc` does not overflow a long.
+     */
+    maxinc = MIN(nelts - 1, LONG_MAX - nelts);
+
+    /* Choose a random number in [1, nelts - 1].  If its greatest divisor
+     * in common with `nelts` is 1, then it will "generate" the additive ring
+     * [0, nelts - 1], so let it be our increment.  Otherwise, choose a new
+     * number.
+     */
+    do {
+        inc = 1 + HDrandom() % maxinc;
+    } while (gcd(inc, nelts) != 1);
+
+    *incp = inc;
+}
 
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks_real
@@ -7046,7 +7115,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
                 rbuf[NPOINTS],
                 check2[20][20];
     hsize_t     coord[NPOINTS][2];
-    hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
+    const hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
     hsize_t    fixed_dmax[2] = {1000, 1000};
     hsize_t     msize[1]={NPOINTS};
     const char  dname[]="dataset";
@@ -7054,7 +7123,9 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     size_t      i, j;
     H5D_chunk_index_t idx_type; /* Dataset chunk index type */
     H5F_libver_t low;           /* File format low bound */
-
+    long ofs, inc;
+    long rows;
+    long cols;
 
     TESTING(testname);
 
@@ -7088,12 +7159,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j=0; j<dsize[1]/csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = (long)(dsize[0]/csize[0]);
+    cols = (long)(dsize[1]/csize[1]);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dsize[0]/csize[0]);
-            chunk_col = (int)HDrandom () % (int)(dsize[1]/csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+        ofs = (ofs + inc) % (rows * cols);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row+chunk_col+1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7211,12 +7286,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
+    H5_CHECKED_ASSIGN(rows, int, nsize[0] / csize[0], long);
+    H5_CHECKED_ASSIGN(cols, int, nsize[1] / csize[1], long);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+        ofs = (ofs + inc) % (rows * cols);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7317,12 +7396,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = (long)(nsize[0] / csize[0]);
+    cols = (long)(nsize[1] / csize[1]);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+        ofs = (ofs + inc) % (rows * cols);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7468,10 +7551,10 @@ static herr_t
 test_deprec(hid_t file)
 {
     hid_t    dataset, space, small_space, create_parms, dcpl;
-    hsize_t    dims[2], small_dims[2];
-    hsize_t     deprec_size;
-    herr_t    status;
-    hsize_t    csize[2];
+    hsize_t  dims[2], small_dims[2];
+    hsize_t  deprec_size;
+    herr_t   H5_ATTR_NDEBUG_UNUSED status;
+    hsize_t  csize[2];
 
     TESTING("deprecated API routines");
 
@@ -8341,7 +8424,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
             H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
             /* Loop over storage allocation time */
-            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
                 unsigned ndims;          /* Current # of dims to test */
 
                 /* Loop over dataspace ranks to test */
@@ -8641,7 +8724,7 @@ test_reopen_chunk_fast(hid_t fapl)
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
     /* Loop over storage allocation time */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -8772,7 +8855,7 @@ test_chunk_fast_bug1(hid_t fapl)
     if((sid = H5Screate_simple(2, dim, max_dim)) < 0) FAIL_STACK_ERROR
 
     /* Loop over storage allocation time */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
         /* Create file */
         if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -8950,7 +9033,7 @@ test_chunk_expand(hid_t fapl)
         if(TRUE != H5Zfilter_avail(H5Z_FILTER_EXPAND)) FAIL_STACK_ERROR
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
 
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
@@ -9338,7 +9421,7 @@ test_fixed_array(hid_t fapl)
     hid_t    dsid_max = -1;    /* Dataset ID for dataset with maximum dimensions set */
 
     hsize_t     dim2[2] = {48, 18};           /* Dataset dimensions */
-    hsize_t     dim2_big[2] = {500, 60};      /* Big dataset dimensions */
+    const hsize_t     dim2_big[2] = {500, 60};      /* Big dataset dimensions */
     hsize_t     dim2_max[2] = {120, 50};      /* Maximum dataset dimensions */
 
     hid_t       mem_id;          /* Memory space ID */
@@ -9352,7 +9435,7 @@ test_fixed_array(hid_t fapl)
     int         rbuf[POINTS];              /* read buffer */
     int         *rbuf_big = NULL;      /* read buffer for big dataset */
 
-    hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
+    const hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
     int         chunks[12][6];          /* # of chunks for dataset dimensions */
     int         chunks_big[125][20];    /* # of chunks for big dataset dimensions */
     int         chunk_row;              /* chunk row index */
@@ -9374,6 +9457,9 @@ test_fixed_array(hid_t fapl)
 
     size_t      i, j;               /* local index variables */
     herr_t      ret;                /* Generic return value */
+    long ofs, inc;
+    long rows;
+    long cols;
 
     TESTING("datasets w/fixed array as chunk index");
 
@@ -9404,7 +9490,7 @@ test_fixed_array(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -9432,16 +9518,20 @@ test_fixed_array(hid_t fapl)
         for(j = 0; j < dim2[1]/chunk_dim2[1]; j++)
             chunks[i][j] = 0;
 
+        rows = (long)(dim2[0]/chunk_dim2[0]);
+        cols = (long)(dim2[1]/chunk_dim2[1]);
+        make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dim2[0]/chunk_dim2[0]);
-            chunk_col = (int)HDrandom () % (int)(dim2[1]/chunk_dim2[1]);
-        } while (chunks[chunk_row][chunk_col]);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+            ofs = (ofs + inc) % (rows * cols);
+            HDassert(!chunks[chunk_row][chunk_col]);
 
-        wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
-        coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
+            wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+            coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
+            coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
         } /* end for */
 
         /* Create first dataset with cur and max dimensions */
@@ -9557,16 +9647,20 @@ test_fixed_array(hid_t fapl)
         for(j = 0; j < dim2_big[1]/chunk_dim2[1]; j++)
             chunks_big[i][j] = 0;
 
+        rows = (long)(dim2_big[0]/chunk_dim2[0]);
+        cols = (long)(dim2_big[1]/chunk_dim2[1]);
+        make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS_BIG; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dim2_big[0]/chunk_dim2[0]);
-            chunk_col = (int)HDrandom () % (int)(dim2_big[1]/chunk_dim2[1]);
-        } while (chunks_big[chunk_row][chunk_col]);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+            ofs = (ofs + inc) % (rows * cols);
+            HDassert(!chunks_big[chunk_row][chunk_col]);
 
-        wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
-        coord_big[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
+            wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+            coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
+            coord_big[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
         } /* end for */
 
         /* Create dataspace for write buffer */
@@ -9805,7 +9899,7 @@ test_single_chunk(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -10335,8 +10429,8 @@ test_zero_dim_dset(hid_t fapl)
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combination, and verify support for reading a 1D
        chunked dataset with dimension size = 0 */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Set version bounds before opening the file */
             H5E_BEGIN_TRY {
@@ -10673,7 +10767,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     const hsize_t maxshape[1] = { H5S_UNLIMITED };
     const hsize_t chunk[1] = { 8 };
     const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    H5O_info_t info;
+    H5O_info2_t info;
 
     TESTING("Extensible array chunk index header flush dependencies handled correctly");
 
@@ -10738,9 +10832,9 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -10793,7 +10887,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     const hsize_t maxshape[1] = { 64 };
     const hsize_t chunk[1] = { 8 };
     const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    H5O_info_t info;
+    H5O_info2_t info;
 
     TESTING("Fixed array chunk index header flush dependencies handled correctly");
 
@@ -10858,9 +10952,9 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -10913,7 +11007,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     const hsize_t maxshape[2] = { H5S_UNLIMITED, H5S_UNLIMITED };
     const hsize_t chunk[2] = { 8, 8 };
     const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    H5O_info_t info;
+    H5O_info2_t info;
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
 
@@ -10978,9 +11072,9 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -12686,20 +12780,23 @@ error:
 } /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid )
+dls_01_read_stuff(hid_t fid)
 {
     int status = 0;
     hid_t did = 0;
-    H5O_info_t info;
+    H5O_info2_t info;
 
-    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
-    if ( did <= 0 ) TEST_ERROR
+    did = H5Dopen2(fid, DLS_01_DATASET, H5P_DEFAULT);
+    if(did <= 0)
+        TEST_ERROR
 
-    status = H5Oget_info2( did, &info, H5O_INFO_BASIC );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Oget_info3(did, &info, H5O_INFO_BASIC);
+    if(status != 0)
+        TEST_ERROR
 
-    status = H5Dclose( did );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Dclose(did);
+    if(status != 0)
+        TEST_ERROR
 
     return SUCCEED;
 
@@ -12964,8 +13061,8 @@ test_versionbounds(void)
     /* Create a source file and a dataset in it.  Create a virtual file and
        virtual dataset.  Creation of virtual dataset should only succeed in
        H5F_LIBVER_V110 */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Set version bounds, skip for invalid low/high combination */
             H5E_BEGIN_TRY {
@@ -13043,7 +13140,7 @@ test_versionbounds(void)
     return FAIL;
 } /* end test_versionbounds() */
 
-
+
 /*-----------------------------------------------------------------------------
  * Function:   test_object_header_minimization_dcpl
  *

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TEST C)
 
 #-----------------------------------------------------------------------------
@@ -194,6 +194,7 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tmeta.c
     ${HDF5_TEST_SOURCE_DIR}/tmisc.c
     ${HDF5_TEST_SOURCE_DIR}/trefer.c
+    ${HDF5_TEST_SOURCE_DIR}/trefer_deprec.c
     ${HDF5_TEST_SOURCE_DIR}/trefstr.c
     ${HDF5_TEST_SOURCE_DIR}/tselect.c
     ${HDF5_TEST_SOURCE_DIR}/tskiplist.c
@@ -250,6 +251,7 @@ set (H5_TESTS
     external
     external_env
     efc
+    objcopy_ref
     objcopy
     links
     unlink
@@ -523,4 +525,6 @@ else ()
 endif ()
 set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

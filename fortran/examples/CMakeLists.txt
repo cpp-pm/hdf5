@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_F90_EXAMPLES C Fortran)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
@@ -173,6 +173,6 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   endif ()
 endif ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_FORTRAN AND HDF5_TEST_EXAMPLES)
   include (CMakeTests.cmake)
 endif ()

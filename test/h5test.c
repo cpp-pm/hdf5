@@ -195,8 +195,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *      sub_filename in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
@@ -236,7 +235,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
         }
@@ -246,7 +245,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
     return;
 } /* end h5_delete_test_file() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -989,7 +988,7 @@ h5_get_vfd_fapl(hid_t fapl)
         HDmemset(memb_addr, 0, sizeof(memb_addr));
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
             sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN);
             HDassert(sv[mt]);
@@ -1001,7 +1000,7 @@ h5_get_vfd_fapl(hid_t fapl)
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             goto error;
 
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             HDfree(sv[mt]);
     } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
@@ -1320,8 +1319,7 @@ h5_dump_info_object(MPI_Info info)
     int    flag;
     int    i, nkeys;
 
-    HDprintf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-  MPI_MAX_INFO_VAL);
+    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
   HDprintf("object is MPI_INFO_NULL\n");
     }
@@ -1358,8 +1356,7 @@ h5_dump_info_object(MPI_Info info)
  *      temp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1397,7 +1394,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             h5_stat_size_t tot_size = 0;
 
             HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                 /* Create the filename to query */
                 HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
 
@@ -1461,7 +1458,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return(-1);
 } /* end get_file_size() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
@@ -1697,7 +1694,7 @@ error:
  */
 static herr_t
 h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
-    const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
+    const H5O_info2_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
         return H5G__verify_cached_stabs_test(oid);
@@ -1745,7 +1742,7 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
             continue;
         } /* end if */
 
-        if(H5Ovisit2(file, H5_INDEX_NAME, H5_ITER_NATIVE,
+        if(H5Ovisit3(file, H5_INDEX_NAME, H5_ITER_NATIVE,
                 h5_verify_cached_stabs_cb, NULL, H5O_INFO_BASIC) < 0)
             goto error;
 

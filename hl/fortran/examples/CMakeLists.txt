@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_HL_F90_EXAMPLES C Fortran)
 
 set (examples
@@ -52,6 +52,6 @@ foreach (example ${examples})
   endif ()
 endforeach ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_FORTRAN AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

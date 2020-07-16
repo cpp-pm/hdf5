@@ -1086,6 +1086,57 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I_is_file_object
+ *
+ * Purpose:     Convenience function to determine if an ID represents
+ *              a file object.
+ *
+ *              In H5O calls, you can't use object_verify to ensure
+ *              the ID was of the correct class since there's no
+ *              H5I_OBJECT ID class.
+ *
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5I_is_file_object(hid_t id)
+{
+    H5I_type_t  id_type     = H5I_get_type(id);
+    htri_t      ret_value   = FAIL;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    /* Fail if the ID type is out of range */
+    if (id_type < 1 || id_type >= H5I_NTYPES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID type out of range");
+
+    /* Return TRUE if the ID is a file object (dataset, group, map, or committed
+     * datatype), FALSE otherwise.
+     */
+    if (H5I_DATASET == id_type || H5I_GROUP == id_type || H5I_MAP == id_type) {
+        ret_value = TRUE;
+    }
+    else if (H5I_DATATYPE == id_type) {
+
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get underlying datatype struct");
+
+        ret_value = H5T_is_named(dt);
+    }
+    else {
+        ret_value = FALSE;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5I_is_file_object() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Iremove_verify
  *
  * Purpose:     Removes the specified ID from its type, first checking that the
@@ -1184,8 +1235,7 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     if(NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
 
-    /* (Casting away const OK -QAK) */
-    ret_value = (void *)curr_id->obj_ptr;
+    ret_value = (void *)curr_id->obj_ptr;       /* (Casting away const OK -QAK) */
     curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
 
     /* Decrement the number of IDs in the type */
@@ -2169,7 +2219,7 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5VL_object_t *vol_obj;     /* Object token of loc_id */
+    H5VL_object_t *vol_obj;     /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     ssize_t       ret_value;    /* Return value */
 
@@ -2208,8 +2258,8 @@ done:
 hid_t
 H5Iget_file_id(hid_t obj_id)
 {
-    H5I_type_t      type;                           /* ID type */
-    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value */
+    H5I_type_t  type;                           /* ID type */
+    hid_t       ret_value   = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", obj_id);
@@ -2218,8 +2268,15 @@ H5Iget_file_id(hid_t obj_id)
     type = H5I_TYPE(obj_id);
 
     /* Call internal function */
-    if (H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        if ((ret_value = H5F_get_file_id(obj_id, type, TRUE)) < 0)
+    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+        H5VL_object_t *vol_obj;         /* Object of obj_id */
+
+        /* Get the VOL object */
+        if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+        /* Get the file ID */
+        if((ret_value = H5F_get_file_id(vol_obj, type, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
     } /* end if */
     else

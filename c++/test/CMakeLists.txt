@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_CPP_TEST CXX)
 
 # --------------------------------------------------------------------
@@ -56,4 +56,6 @@ else ()
 endif ()
 set_target_properties (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_CPP AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

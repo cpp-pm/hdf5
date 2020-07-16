@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_HL_TEST C)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
@@ -93,4 +93,6 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   set_target_properties (hl_gen_test_ld PROPERTIES FOLDER test/hl/gen)
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

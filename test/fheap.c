@@ -545,8 +545,7 @@ get_fill_size(const fheap_test_param_t *tparam)
  *      test_desc in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static int
 begin_test(fheap_test_param_t *tparam, const char *base_desc,
     fheap_heap_ids_t *keep_ids, size_t *fill_size)
@@ -575,7 +574,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc,
     /* Success */
     return(0);
 } /* end begin_test() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -16458,7 +16457,7 @@ main(void)
         }
 
         /* Iterate over the testing parameters */
-        for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; H5_INC_ENUM(fheap_test_type_t, curr_test)) {
+        for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; curr_test++) {
             /* Clear the testing parameters */
             HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
             tparam.actual_id_len = HEAP_ID_LEN;
@@ -16500,7 +16499,7 @@ main(void)
             fheap_test_fill_t fill;        /* Size of objects to fill heap blocks with */
 
             /* Filling with different sized objects */
-            for(fill = FHEAP_TEST_FILL_LARGE; fill < FHEAP_TEST_FILL_N; H5_INC_ENUM(fheap_test_fill_t, fill)) {
+            for(fill = FHEAP_TEST_FILL_LARGE; fill < FHEAP_TEST_FILL_N; fill++) {
                 tparam.fill = fill;
 
                 /* Set appropriate testing parameters for each test */
@@ -16593,9 +16592,9 @@ main(void)
                 fheap_test_del_drain_t drain_half;   /* Deletion draining */
 
                 /* More complex removal patterns */
-                for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
+                for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
                     tparam.del_dir = del_dir;
-                    for(drain_half = FHEAP_DEL_DRAIN_ALL; drain_half < FHEAP_DEL_DRAIN_N; H5_INC_ENUM(fheap_test_del_drain_t, drain_half)) {
+                    for(drain_half = FHEAP_DEL_DRAIN_ALL; drain_half < FHEAP_DEL_DRAIN_N; drain_half++) {
                         tparam.drain_half = drain_half;
                         /* Don't need to test deletion directions when deleting entire heap */
                         if(tparam.del_dir == FHEAP_DEL_HEAP && tparam.drain_half > FHEAP_DEL_DRAIN_ALL)
@@ -16703,7 +16702,7 @@ main(void)
                 } /* end switch */
 
                 /* Try several different methods of deleting objects */
-                for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
+                for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
                     tparam.del_dir = del_dir;
 
                     /* Test 'huge' object insert & delete */
@@ -16731,7 +16730,7 @@ main(void)
             {
             fheap_test_del_dir_t del_dir;   /* Deletion direction */
 
-            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
+            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
                 tparam.del_dir = del_dir;
 
                 /* Controlled tests */
